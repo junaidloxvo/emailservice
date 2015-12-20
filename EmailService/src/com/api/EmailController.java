@@ -18,7 +18,7 @@ public class EmailController {
 	public ResponseEntity<Email>  greeting() {
 
 		Email e = new Email();
-		e.setComp_id(868L);
+		e.setComp_id(8868L);
 	
 		return new ResponseEntity<Email>(e , HttpStatus.BAD_REQUEST) ;
 
