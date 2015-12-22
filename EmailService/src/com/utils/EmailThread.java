@@ -18,8 +18,8 @@ import javax.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dao.EmailService;
 import com.model.Email;
+import com.service.EmailService;
 
 public class EmailThread implements Runnable {
 
