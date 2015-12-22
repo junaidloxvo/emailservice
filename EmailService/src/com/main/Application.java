@@ -9,7 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
  */
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.api"})
+@ComponentScan(basePackages = {"com.api","com.dao","com.utils"})
 public class Application {
 
 	public static void main(String[] args) {

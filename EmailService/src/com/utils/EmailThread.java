@@ -15,19 +15,28 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.dao.EmailService;
 import com.model.Email;
 
 public class EmailThread implements Runnable {
 
 
+	
+	EmailService service ;
+	
+	
 	private Email email ;
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
 		this.sendMail();
 	}
-	public EmailThread(Email email){
+	public EmailThread(Email email,EmailService service ){
 		this.email = email ;
+		this.service = service;
 	}
 
 
@@ -68,6 +77,7 @@ public class EmailThread implements Runnable {
 			mailMessage.saveChanges();
 
 			Transport.send(simpleMessage);
+			service.saveEmail(email);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
