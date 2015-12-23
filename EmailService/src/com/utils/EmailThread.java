@@ -77,9 +77,20 @@ public class EmailThread implements Runnable {
 			mailMessage.saveChanges();
 
 			Transport.send(simpleMessage);
-			service.saveEmail(email);
+			
+			
+			email.setSended(true);
+			if(email.getId() == null){
+				service.saveEmail(email);
+			}else{
+				service.updateEmail(email);
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
+			email.setSended(false);
+			email.setLast_error(e.getMessage());
+			service.saveEmail(email);
 		}
 
 	}

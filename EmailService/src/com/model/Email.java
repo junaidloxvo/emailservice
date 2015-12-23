@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_NULL)
 public class Email {
 
-
+	private Long id ;
 	private Long comp_id;
 	private String 	topic;
 	private String content_html;
@@ -85,6 +85,14 @@ public class Email {
 
 	public String getLast_error() {
 		return last_error;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public void setLast_error(String last_error) {
