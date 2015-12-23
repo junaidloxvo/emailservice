@@ -17,6 +17,8 @@ public interface EmailService {
 	public  void updateEmail(Email email);
 	
 	public List<Email> getPendingEmails();
+	
+	public Email getEmailByid(Long id);
     
     
 }

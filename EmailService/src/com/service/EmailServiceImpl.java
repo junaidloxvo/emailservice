@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -59,6 +60,21 @@ public class EmailServiceImpl implements EmailService {
 		int row = jdbcTemplate.update(
                 "update `emails`  set sended   = ? , sended_date = ? where id = ?",  true,new Date(), email.getId());
 		
+	}
+
+	@Override
+	public Email getEmailByid(Long id) {
+		Email email = null;
+		try {
+			String sql = "SELECT * FROM emails WHERE id = ?  ";
+			email = (Email) jdbcTemplate.queryForObject(
+					sql, new Object[] { id },
+					new BeanPropertyRowMapper(Email.class));
+		} catch (Exception e) {
+			return null;
+		}
+	
+		return email;
 	}
 
 }
