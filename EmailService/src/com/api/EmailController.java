@@ -34,13 +34,11 @@ public class EmailController {
 	@Autowired
 	EmailService emailService ;
 	
-	@RequestMapping(value="/api/sendEmail" , method=RequestMethod.POST)
+	@RequestMapping(value="/api/createEmail" , method=RequestMethod.POST)
 	public ResponseEntity<String>  sendMail(@RequestBody Email email) {
 
 
-		
-	
-		 
+ 
 
 		return new ResponseEntity<String>("Email Sent" , HttpStatus.OK) ;
 
@@ -72,8 +70,8 @@ public class EmailController {
 
 	}
 	
-	 @RequestMapping(value="/api/upload", method=RequestMethod.POST)
-	    public @ResponseBody String handleFileUpload(@RequestParam("email") String emailJson,
+	 @RequestMapping(value="/api/sendEmail", method=RequestMethod.POST)
+	    public @ResponseBody String sendEmail(@RequestParam("email") String emailJson,
 	            @RequestParam("file") MultipartFile file){
 	        if (!file.isEmpty()) {
 	            try {
