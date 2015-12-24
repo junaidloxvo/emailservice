@@ -1,8 +1,10 @@
 package com.schedule;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,27 +18,33 @@ import com.utils.EmailThread;
 public class ScheduledTasks {
 
 	@Autowired
-	
+
 	EmailService emailService ;
-	
-	
-	
 
-	    @Scheduled(fixedRate = 9000)
-	    public void resendPendingEmails() {
-	    	List<Email> pendingEmails =  emailService.getPendingEmails();
-	    	
-	    	if(pendingEmails != null && pendingEmails.size() > 0){
-	    		for(Email email : pendingEmails){
-	    			EmailThread mailThread = new EmailThread(email,emailService);
-	    			Thread t = new Thread(mailThread);
-	    			t.start();
-	    		}
 
-	    	}
-	    	
-	        
-	    }
-	    
-	  
+
+
+	@Scheduled(fixedRate = 9000)
+	public void resendPendingEmails() throws IOException {
+
+		List<Email> pendingEmails =  emailService.getPendingEmails();
+
+		if(pendingEmails != null && pendingEmails.size() > 0){
+			for(Email email : pendingEmails){
+				email.setAttachments( emailService.getAttachmentsById(email.getId()));
+				File tempFile = File.createTempFile(email.getAttachments().get(0).getFileName(), email.getAttachments().get(0).getExt(), null);
+				FileOutputStream fos = new FileOutputStream(tempFile);
+				fos.write(email.getAttachments().get(0).getContent());
+				fos.close();
+				EmailThread mailThread = new EmailThread(email,emailService,tempFile);
+				Thread t = new Thread(mailThread);
+				t.start();
+			}
+
+		}
+
+
+	}
+
+
 }

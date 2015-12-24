@@ -1,6 +1,8 @@
 package com.model;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -25,7 +27,16 @@ public class Email {
 	private String send_as_name  ;
 	private String created_by_name ;
 	private String created_by_initials  ;
+	private List<Attachment> attachments = new ArrayList<Attachment>();
 
+
+	public List<Attachment> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<Attachment> attachments) {
+		this.attachments = attachments;
+	}
 
 	public Long getComp_id() {
 		return comp_id;

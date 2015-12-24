@@ -1,22 +1,27 @@
 package com.utils;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
 import javax.mail.Authenticator;
+import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.model.Email;
 import com.service.EmailService;
@@ -26,7 +31,7 @@ public class EmailThread implements Runnable {
 
 	
 	EmailService service ;
-	
+	File file;
 	
 	private Email email ;
 	@Override
@@ -34,9 +39,10 @@ public class EmailThread implements Runnable {
 		// TODO Auto-generated method stub
 		this.sendMail();
 	}
-	public EmailThread(Email email,EmailService service ){
+	public EmailThread(Email email,EmailService service ,File file  ){
 		this.email = email ;
 		this.service = service;
+		this.file = file ;
 	}
 
 
@@ -69,19 +75,39 @@ public class EmailThread implements Runnable {
 
 		try {
 			Session session = getSession();
-			Message mailMessage = new MimeMessage(session);
-			MimeMessage simpleMessage = new MimeMessage(session);
-			setRecipients(simpleMessage, email.getRecipients(), email.getReceipents_cc(), "");
-			simpleMessage.setText(email.getContent_html(), "utf-8", "html");
-			simpleMessage.setSubject(email.getTopic());
-			mailMessage.saveChanges();
+	
+			MimeMessage message = new MimeMessage(session);
+			setRecipients(message, email.getRecipients(), email.getReceipents_cc(), "");
+			
+			message.setSubject(email.getTopic());
+		
+			MimeBodyPart  messageBodyPart = new MimeBodyPart();
+			MimeBodyPart  messageBodyAttachment = new MimeBodyPart();
+			messageBodyPart.setText(email.getContent_html());
+	        messageBodyPart.setContent(email.getContent_html(), "text/html");
+	    	Multipart multipart = new MimeMultipart();
+	    	multipart.addBodyPart(messageBodyPart);
+			
+	    	if(file != null){
+	    		  // attach the file to the message
+		    	messageBodyAttachment.attachFile(file);
+		    	multipart.addBodyPart(messageBodyAttachment);	
+	    	}
+		   
+	      
+	        message.setContent(multipart);
+	        
 
-			Transport.send(simpleMessage);
+			Transport.send(message);
 			
 			
 			email.setSended(true);
 			if(email.getId() == null){
-				service.saveEmail(email);
+				int id = service.saveEmail(email);
+				if(file != null){
+				email.getAttachments().get(0).setEmail_id(new Long(id));
+				service.saveAttachment(email.getAttachments().get(0));
+				}
 			}else{
 				service.updateEmail(email);
 			}
@@ -90,7 +116,11 @@ public class EmailThread implements Runnable {
 			e.printStackTrace();
 			email.setSended(false);
 			email.setLast_error(e.getMessage());
-			service.saveEmail(email);
+			int id =service.saveEmail(email);
+			if(file != null){
+				email.getAttachments().get(0).setEmail_id(new Long(id));
+				service.saveAttachment(email.getAttachments().get(0));
+			}
 		}
 
 	}
