@@ -3,6 +3,7 @@ package com.api;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.model.Attachment;
 import com.model.Email;
@@ -72,29 +75,41 @@ public class EmailController {
 	
 	 @RequestMapping(value="/api/sendEmail", method=RequestMethod.POST)
 	    public @ResponseBody String sendEmail(@RequestParam("email") String emailJson,
-	            @RequestParam("file") MultipartFile file){
-	        if (!file.isEmpty()) {
-	            try {
-	            	ObjectMapper mapper = new ObjectMapper();
-	            	
-	                byte[] bytes = file.getBytes();
-	                BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(file.getOriginalFilename())));
-	                stream.write(bytes);
-	                stream.close();
-	                File convFile = new File( file.getOriginalFilename());
-	   			 	file.transferTo(convFile);
+	            @RequestParam("file") MultipartFile[] files) throws JsonParseException, JsonMappingException, IOException{
+		 
+		  ObjectMapper mapper = new ObjectMapper();
+		  Email email = mapper.readValue(emailJson, Email.class);
+		  File[] tempfiles = new File[files.length] ;
+		  List<Attachment> attachments = new ArrayList<Attachment>();
+		 if (files != null && files.length >0) {
+		 		try {
+		 			
+		 			for(int i =0 ;i< files.length; i++){
+		 				byte[] bytes = files[i].getBytes();
+		 				BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(files[i].getOriginalFilename())));
+		 				stream.write(bytes);
+		 				stream.close();
+		 				File convFile = new File( files[i].getOriginalFilename());
+		 				files[i].transferTo(convFile);
+		 				tempfiles[i] =convFile ;
+		 				
+		 				Attachment att = new Attachment();
+		 				att.setFileName(files[i].getOriginalFilename());
+		 				att.setContent(bytes);
+		 				att.setExt(this.getFileExtension(files[i].getOriginalFilename()));
+		 				attachments.add(att);
+		 				email.setAttachments(attachments);
+		 			}
+	                
+	               
+	               
+	                
 	   			
 	                
-	                Email email = mapper.readValue(emailJson, Email.class);
+	              
 	                
-	                List<Attachment> attachments = new ArrayList<Attachment>();
-	                Attachment att = new Attachment();
-	                att.setFileName(file.getOriginalFilename());
-	                att.setContent(bytes);
-	                att.setExt(this.getFileExtension(file.getOriginalFilename()));
-	                attachments.add(att);
-	                email.setAttachments(attachments);
-	            	EmailThread mailThread = new EmailThread(email,emailService,convFile);
+	          
+	            	EmailThread mailThread = new EmailThread(email,emailService,tempfiles);
 	        		Thread t = new Thread(mailThread);
 	        		 t.start();
 	                

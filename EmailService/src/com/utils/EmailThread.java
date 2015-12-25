@@ -29,17 +29,17 @@ import com.service.EmailService;
 public class EmailThread implements Runnable {
 
 
-	
+
 	EmailService service ;
-	File file;
-	
+	File[] file;
+
 	private Email email ;
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
 		this.sendMail();
 	}
-	public EmailThread(Email email,EmailService service ,File file  ){
+	public EmailThread(Email email,EmailService service ,File[] file  ){
 		this.email = email ;
 		this.service = service;
 		this.file = file ;
@@ -75,43 +75,52 @@ public class EmailThread implements Runnable {
 
 		try {
 			Session session = getSession();
-	
+
 			MimeMessage message = new MimeMessage(session);
 			setRecipients(message, email.getRecipients(), email.getReceipents_cc(), "");
-			
+
 			message.setSubject(email.getTopic());
-		
+
 			MimeBodyPart  messageBodyPart = new MimeBodyPart();
-			MimeBodyPart  messageBodyAttachment = new MimeBodyPart();
+
 			messageBodyPart.setText(email.getContent_html());
-	        messageBodyPart.setContent(email.getContent_html(), "text/html");
-	    	Multipart multipart = new MimeMultipart();
-	    	multipart.addBodyPart(messageBodyPart);
-			
-	    	if(file != null){
-	    		  // attach the file to the message
-		    	messageBodyAttachment.attachFile(file);
-		    	multipart.addBodyPart(messageBodyAttachment);	
-	    	}
-		   
-	      
-	        message.setContent(multipart);
-	        
+			messageBodyPart.setContent(email.getContent_html(), "text/html");
+			Multipart multipart = new MimeMultipart();
+			multipart.addBodyPart(messageBodyPart);
+
+			if (file != null && file.length >0) {
+				// attach the file to the message
+
+				for(int i =0 ;i< file.length; i++){
+					MimeBodyPart  messageBodyAttachment = new MimeBodyPart();
+					messageBodyAttachment.attachFile(file[i]);
+					multipart.addBodyPart(messageBodyAttachment);
+				}
+
+			}
+
+
+			message.setContent(multipart);
+
 
 			Transport.send(message);
-			
-			
+
+
 			email.setSended(true);
 			if(email.getId() == null){
 				int id = service.saveEmail(email);
 				if(file != null){
-				email.getAttachments().get(0).setEmail_id(new Long(id));
-				service.saveAttachment(email.getAttachments().get(0));
+					for(int i =0 ;i< file.length; i++){
+						
+						email.getAttachments().get(i).setEmail_id(new Long(id));
+						service.saveAttachment(email.getAttachments().get(i));
+					}
+
 				}
 			}else{
 				service.updateEmail(email);
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			email.setSended(false);

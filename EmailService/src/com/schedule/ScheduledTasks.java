@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.model.Attachment;
 import com.model.Email;
 import com.service.EmailService;
 import com.utils.EmailThread;
@@ -31,12 +32,21 @@ public class ScheduledTasks {
 
 		if(pendingEmails != null && pendingEmails.size() > 0){
 			for(Email email : pendingEmails){
+
 				email.setAttachments( emailService.getAttachmentsById(email.getId()));
-				File tempFile = File.createTempFile(email.getAttachments().get(0).getFileName(), email.getAttachments().get(0).getExt(), null);
-				FileOutputStream fos = new FileOutputStream(tempFile);
-				fos.write(email.getAttachments().get(0).getContent());
-				fos.close();
-				EmailThread mailThread = new EmailThread(email,emailService,tempFile);
+				File[] files = new File[email.getAttachments().size()];
+				int index = 0;
+				for(Attachment attachment : email.getAttachments() ){
+
+					File tempFile = File.createTempFile(attachment.getFileName(), attachment.getExt(), null);
+					FileOutputStream fos = new FileOutputStream(tempFile);
+					fos.write(attachment.getContent());
+					fos.close();
+					files[index] =  tempFile ;
+					index ++ ;	
+				}
+
+				EmailThread mailThread = new EmailThread(email,emailService,files);
 				Thread t = new Thread(mailThread);
 				t.start();
 			}
