@@ -32,11 +32,7 @@ public class EmailServiceImpl implements EmailService {
 		KeyHolder keyHolder = new GeneratedKeyHolder();
 		
 	final	String sql = "insert into emails (comp_id ,topic ,content_html ,recipients,sended,sended_date) values (?,?,?,?,?,?)   ";
-		/*Object[] params = new Object[] { email.getComp_id(), email.getTopic(), email.getContent_html(), email.getRecipients() ,email.getSended() , new Date() };
-		int row = jdbcTemplate.update(sql, params);*/
-		
-	//	final String INSERT_SQL = "insert into my_test (name) values(?)";
-		//final String name = "Rob";
+
 		
 		jdbcTemplate.update(
 		    new PreparedStatementCreator() {

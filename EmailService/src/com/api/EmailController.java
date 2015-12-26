@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,9 +24,10 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.model.Attachment;
 import com.model.Email;
-import com.mysql.fabric.xmlrpc.base.Array;
 import com.service.EmailService;
 import com.utils.EmailThread;
+import com.utils.Properties;
+
 
 
 @RestController
@@ -37,7 +38,11 @@ public class EmailController {
 	@Autowired
 	EmailService emailService ;
 	
-	@RequestMapping(value="/api/createEmail" , method=RequestMethod.POST)
+	@Autowired
+	Properties properties ;
+
+	
+/*	@RequestMapping(value="/api/createEmail" , method=RequestMethod.POST)
 	public ResponseEntity<String>  sendMail(@RequestBody Email email) {
 
 
@@ -45,12 +50,12 @@ public class EmailController {
 
 		return new ResponseEntity<String>("Email Sent" , HttpStatus.OK) ;
 
-	}
+	}*/
 	
 	@RequestMapping(value="/api/email/{id}" , method=RequestMethod.GET)
 	public ResponseEntity<Email>  sendMail(@PathVariable Long id) {
-
-
+	
+	//	properties.getUsername();
 		Email email = emailService.getEmailByid(id);
 		
 		if(email == null){
@@ -109,7 +114,7 @@ public class EmailController {
 	              
 	                
 	          
-	            	EmailThread mailThread = new EmailThread(email,emailService,tempfiles);
+	            	EmailThread mailThread = new EmailThread(email,emailService,tempfiles,properties);
 	        		Thread t = new Thread(mailThread);
 	        		 t.start();
 	                

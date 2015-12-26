@@ -6,10 +6,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
 import javax.mail.Authenticator;
-import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -21,8 +18,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
-import org.springframework.web.multipart.MultipartFile;
-
 import com.model.Email;
 import com.service.EmailService;
 
@@ -32,6 +27,7 @@ public class EmailThread implements Runnable {
 
 	EmailService service ;
 	File[] file;
+	com.utils.Properties properties ;
 
 	private Email email ;
 	@Override
@@ -39,36 +35,38 @@ public class EmailThread implements Runnable {
 		// TODO Auto-generated method stub
 		this.sendMail();
 	}
-	public EmailThread(Email email,EmailService service ,File[] file  ){
+	public EmailThread(Email email,EmailService service ,File[] file ,com.utils.Properties properties ){
 		this.email = email ;
 		this.service = service;
 		this.file = file ;
+		this.properties = properties ;
 	}
 
 
 
 	private Session getSession() {
-
+	
 		final String username = "testput007@gmail.com";
 		final String password = "testingapp";
-
+	
 		Properties props = new Properties();
-		props.put("mail.smtp.host", "smtp.gmail.com");
-		props.put("mail.smtp.socketFactory.port", "465");
-		props.put("mail.smtp.socketFactory.class","javax.net.ssl.SSLSocketFactory");
-		props.put("mail.smtp.auth", "true");
-		props.put("mail.smtp.port", "465");
-
+		
+		props.put("mail.smtp.host", properties.getSmtpHost());
+		props.put("mail.smtp.socketFactory.port", properties.getSmtpSocketFactoryPort());
+		props.put("mail.smtp.socketFactory.class",properties.getSmtpSocketFactoryClass());
+		props.put("mail.smtp.auth", properties.getSmtpAuth());
+		props.put("mail.smtp.port",properties.getSmtpPort());
+	
 		Session session = Session.getInstance(props, new Authenticator() {
 			public PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(username, password);
+				return new PasswordAuthentication(properties.getSmtpUsername(), properties.getSmtpPassword());
 			}
 		});
-
+	
 		return session;
-
-
-
+	
+	
+	
 	}
 
 	private void sendMail() {
