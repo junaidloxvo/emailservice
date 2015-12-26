@@ -53,7 +53,7 @@ public class EmailController {
 	}*/
 
 	@RequestMapping(value="/api/email/{id}" , method=RequestMethod.GET)
-	public ResponseEntity<Email>  sendMail(@PathVariable Long id) {
+	public ResponseEntity<Email>  getEmailById(@PathVariable Long id) {
 
 		//	properties.getUsername();
 		Email email = emailService.getEmailByid(id);
@@ -83,6 +83,9 @@ public class EmailController {
 			@RequestParam("file") MultipartFile[] files) throws JsonParseException, JsonMappingException, IOException{
 
 		ObjectMapper mapper = new ObjectMapper();
+		if(emailJson.equals("") || emailJson == null){
+			throw new RuntimeException("Email json is required ");
+		}
 		Email email = mapper.readValue(emailJson, Email.class);
 		this.validate(email);
 		File[] tempfiles = new File[files.length] ;
