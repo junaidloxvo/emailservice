@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 
 
-@JsonInclude(Include.NON_NULL)
+
 public class Email {
 
 	private Long id ;

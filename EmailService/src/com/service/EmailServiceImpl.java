@@ -31,7 +31,7 @@ public class EmailServiceImpl implements EmailService {
 
 		KeyHolder keyHolder = new GeneratedKeyHolder();
 
-		final	String sql = "insert into emails (comp_id ,topic ,content_html ,recipients,sended,sended_date) values (?,?,?,?,?,?)   ";
+		final	String sql = "insert into emails (comp_id ,topic ,content_html ,recipients,sended,sended_date,receipents_cc,last_send_attempt,system_name,send_as_email,send_as_name,created_by_name,created_by_initials) values (?,?,?,?,?,?,?,?,?,?,?,?,?)   ";
 
 
 		jdbcTemplate.update(
@@ -45,6 +45,13 @@ public class EmailServiceImpl implements EmailService {
 						ps.setString(4,email.getRecipients() );
 						ps.setBoolean(5, true);
 						ps.setDate(6, new java.sql.Date(new Date().getTime()));
+						ps.setString(7, email.getReceipents_cc());
+						ps.setDate(8, new java.sql.Date(new Date().getTime()));
+						ps.setString(9, email.getSystem_name());
+						ps.setString(10, email.getSend_as_email());
+						ps.setString(11, email.getSend_as_name());
+						ps.setString(12, email.getCreated_by_name());
+						ps.setString(13, email.getCreated_by_initials());
 						return ps;
 					}
 				},
