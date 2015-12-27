@@ -24,38 +24,38 @@ public class EmailServiceImpl implements EmailService {
 
 	@Autowired
 	JdbcTemplate jdbcTemplate ;
-	
+
 	@Override
 	public int saveEmail(final Email email) {
 		// TODO Auto-generated method stub
-		
-		KeyHolder keyHolder = new GeneratedKeyHolder();
-		
-	final	String sql = "insert into emails (comp_id ,topic ,content_html ,recipients,sended,sended_date) values (?,?,?,?,?,?)   ";
 
-		
+		KeyHolder keyHolder = new GeneratedKeyHolder();
+
+		final	String sql = "insert into emails (comp_id ,topic ,content_html ,recipients,sended,sended_date) values (?,?,?,?,?,?)   ";
+
+
 		jdbcTemplate.update(
-		    new PreparedStatementCreator() {
-		        public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-		            PreparedStatement ps =
-		                connection.prepareStatement(sql, new String[] {"id"});
-		            ps.setLong(1, email.getComp_id());
-		            ps.setString(2,email.getTopic() );
-		            ps.setString(3,email.getContent_html() );
-		            ps.setString(4,email.getRecipients() );
-		            ps.setBoolean(5, email.getSended());
-		            ps.setDate(6, new java.sql.Date(new Date().getTime()));
-		            return ps;
-		        }
-		    },
-		    keyHolder);
-		
-	return	keyHolder.getKey().intValue();
-		
+				new PreparedStatementCreator() {
+					public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+						PreparedStatement ps =
+								connection.prepareStatement(sql, new String[] {"id"});
+						ps.setLong(1, email.getComp_id());
+						ps.setString(2,email.getTopic() );
+						ps.setString(3,email.getContent_html() );
+						ps.setString(4,email.getRecipients() );
+						ps.setBoolean(5, true);
+						ps.setDate(6, new java.sql.Date(new Date().getTime()));
+						return ps;
+					}
+				},
+				keyHolder);
+
+		return	keyHolder.getKey().intValue();
+
 	}
-	
+
 	public List<Email> getPendingEmails() {
-	
+
 		List<Email> emails = null;
 		try {
 			String sql = "SELECT * FROM emails WHERE  `sended` = '0' ";
@@ -81,10 +81,11 @@ public class EmailServiceImpl implements EmailService {
 
 	@Override
 	public void updateEmail(Email email) {
-		
+
+	
 		int row = jdbcTemplate.update(
-                "update `emails`  set sended   = ? , sended_date = ? where id = ?",  true,new Date(), email.getId());
-		
+				"update `emails`  set sended   = ? , sended_date = ? , last_error = ?  where id = ?",email.getSended(),new Date(),email.getLast_error(),email.getId());
+
 	}
 
 	@Override
@@ -98,24 +99,24 @@ public class EmailServiceImpl implements EmailService {
 		} catch (Exception e) {
 			return null;
 		}
-	
+
 		return email;
 	}
 
 	@Override
 	public void saveAttachment(Attachment attachment) {
-		
+
 		String sql = "insert into attachments (email_id ,content  ,fileName,ext) values (?,?,?,?)   ";
 		Object[] params = new Object[] { attachment.getEmail_id(),attachment.getContent(), attachment.getFileName(),"."+attachment.getExt() };
 		int row = jdbcTemplate.update(sql, params);
-		
+
 	}
 
 	@Override
 	public List<Attachment> getAttachmentsById(Long id) {
 		// TODO Auto-generated method stub
 
-		
+
 		List<Attachment> attachments = null;
 		try {
 			String sql = "SELECT * FROM attachments WHERE  `email_id` = '"+id+"' ";
@@ -123,7 +124,7 @@ public class EmailServiceImpl implements EmailService {
 				@Override
 				public Attachment mapRow(ResultSet rs, int rowNum) throws SQLException {
 					Attachment attachment = new Attachment();
-					
+
 					attachment.setContent(rs.getBytes("content"));
 					attachment.setFileName(rs.getString("fileName"));
 					attachment.setExt(rs.getString("ext"));
@@ -136,7 +137,7 @@ public class EmailServiceImpl implements EmailService {
 		}
 		;
 		return attachments;
-	
+
 	}
 
 }

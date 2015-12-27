@@ -45,10 +45,7 @@ public class EmailThread implements Runnable {
 
 
 	private Session getSession() {
-	
-		final String username = "testput007@gmail.com";
-		final String password = "testingapp";
-	
+		
 		Properties props = new Properties();
 		
 		props.put("mail.smtp.host", properties.getSmtpHost());
@@ -102,32 +99,18 @@ public class EmailThread implements Runnable {
 
 
 			Transport.send(message);
-
-
+			
 			email.setSended(true);
-			if(email.getId() == null){
-				int id = service.saveEmail(email);
-				if(file != null){
-					for(int i =0 ;i< file.length; i++){
-						
-						email.getAttachments().get(i).setEmail_id(new Long(id));
-						service.saveAttachment(email.getAttachments().get(i));
-					}
-
-				}
-			}else{
-				service.updateEmail(email);
-			}
+			email.setLast_error("");
+			service.updateEmail(email);
+			
 
 		} catch (Exception e) {
 			e.printStackTrace();
 			email.setSended(false);
 			email.setLast_error(e.getMessage());
-			int id =service.saveEmail(email);
-			if(file != null){
-				email.getAttachments().get(0).setEmail_id(new Long(id));
-				service.saveAttachment(email.getAttachments().get(0));
-			}
+			service.updateEmail(email);
+			
 		}
 
 	}

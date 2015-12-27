@@ -90,38 +90,47 @@ public class EmailController {
 		this.validate(email);
 		File[] tempfiles = new File[files.length] ;
 		List<Attachment> attachments = new ArrayList<Attachment>();
-		if (files != null && files.length >0) {
+		
 			try {
+				if (files != null && files.length >0) {
+					for(int i =0 ;i< files.length; i++){
+						byte[] bytes = files[i].getBytes();
+						BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(files[i].getOriginalFilename())));
+						stream.write(bytes);
+						stream.close();
+						File convFile = new File( files[i].getOriginalFilename());
+						files[i].transferTo(convFile);
+						tempfiles[i] =convFile ;
 
-				for(int i =0 ;i< files.length; i++){
-					byte[] bytes = files[i].getBytes();
-					BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(files[i].getOriginalFilename())));
-					stream.write(bytes);
-					stream.close();
-					File convFile = new File( files[i].getOriginalFilename());
-					files[i].transferTo(convFile);
-					tempfiles[i] =convFile ;
-
-					Attachment att = new Attachment();
-					att.setFileName(files[i].getOriginalFilename());
-					att.setContent(bytes);
-					att.setExt(this.getFileExtension(files[i].getOriginalFilename()));
-					attachments.add(att);
-					email.setAttachments(attachments);
+						Attachment att = new Attachment();
+						att.setFileName(files[i].getOriginalFilename());
+						att.setContent(bytes);
+						att.setExt(this.getFileExtension(files[i].getOriginalFilename()));
+						attachments.add(att);
+						email.setAttachments(attachments);
+					}
 				}
+				int id = emailService.saveEmail(email);
+				
+				if(tempfiles != null){
+					for(int i =0 ;i< tempfiles.length; i++){
+						
+						email.getAttachments().get(i).setEmail_id(new Long(id));
+						emailService.saveAttachment(email.getAttachments().get(i));
+					}
 
+				}
+		
 
 				EmailThread mailThread = new EmailThread(email,emailService,tempfiles,properties);
 				Thread t = new Thread(mailThread);
 				t.start();
 
-				return "Email is Queued";
+				return "Email is Queued ,"+" Email ID:"+id;
 			} catch (Exception e) {
-
+				e.printStackTrace();
 			}
-		} else {
-
-		}
+		
 		return "";
 	}
 
